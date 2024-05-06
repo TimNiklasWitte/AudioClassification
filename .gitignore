@@ -1,2 +1,3 @@
 *.pyc
 Prototype/mini_speech_commands/*
+.ipynb_checkpoints/
