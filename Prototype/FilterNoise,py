@@ -1,0 +1,49 @@
+from os.path import dirname, join as pjoin
+import matplotlib.pyplot as plt
+import numpy as np
+import scipy
+import scipy.io
+from scipy.io import wavfile
+from scipy import signal
+import wave
+import pyaudio
+import sounddevice
+import numpy as np
+
+
+#data_dir = pjoin(dirname(scipy.io.__file__), 'tests', 'data')
+#wav_fname = pjoin(data_dir, 'test-44100Hz-2ch-32bit-float-be.wav')
+
+#data_dir = pjoin('..', 'LESSI noise')
+#wav_fname = pjoin(data_dir, 'Idel.wav')
+samplerate, data = wavfile.read("../Lessi noise/Idel.wav")
+#print(f"number of channels = {data.shape[1]}")
+print(f"number of channels = {samplerate}")
+
+#data0 = data[:, 0]
+print(f"samplerate = {samplerate}")
+fig, ax1 = plt.subplots() 
+
+Pxx, freqs, bins, im = ax1.specgram(x = data, Fs=samplerate)
+# The `specgram` method returns 4 objects. They are:
+# - Pxx: the periodogram
+# - freqs: the frequency vector
+# - bins: the centers of the time bins
+# - im: the .image.AxesImage instance representing the data in the plot
+ax1.set_xlabel('Time (s)')
+ax1.set_ylabel('Frequency (Hz)')
+plt.draw()
+sos = signal.butter(10, 1000,'lowpass',fs=samplerate,  output='sos')
+filtered = signal.sosfilt(sos, data)
+fig, ax1 = plt.subplots() 
+
+Pxx, freqs, bins, im = ax1.specgram(x = data, Fs=samplerate)
+# The `specgram` method returns 4 objects. They are:
+# - Pxx: the periodogram
+# - freqs: the frequency vector
+# - bins: the centers of the time bins
+# - im: the .image.AxesImage instance representing the data in the plot
+ax1.set_xlabel('Time (s)')
+ax1.set_ylabel('Frequency (Hz)')
+Pxx, freqs, bins, im = ax1.specgram(x = filtered, Fs=samplerate)
+plt.show()
