@@ -1,3 +1,4 @@
 *.pyc
 Prototype/mini_speech_commands/*
+SpeechMovementCommandClassifier/speech_commands_v0.02/*
 .ipynb_checkpoints/
