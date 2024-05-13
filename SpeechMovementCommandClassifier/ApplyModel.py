@@ -19,7 +19,7 @@ def main():
     classifier.build(input_shape=(1, 124, 129, 1))
     classifier.summary()
 
-    classifier.load_weights(f"./saved_models/epoch_100.weights.h5")
+    classifier.load_weights(f"./saved_models/epoch_20.weights.h5")
 
     p = pyaudio.PyAudio()
 
