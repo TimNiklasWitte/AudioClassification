@@ -2,8 +2,8 @@ import tensorflow as tf
 
 class Classifier(tf.keras.Model):
 
-    def __init__(self):
-        super(Classifier, self).__init__()
+    def __init__(self,**kwargs):
+        super(Classifier, self).__init__(**kwargs)
 
         self.layer_list = [
             tf.keras.layers.Conv2D(8, kernel_size=(3, 3), strides=2, padding='same', activation="relu"),
