@@ -4,20 +4,20 @@ import os
 import matplotlib.pyplot as plt
 
 # alphanumeric order
-labels = sorted(os.listdir("./speech_commands_v0.02"))
+labels = sorted(os.listdir("./../../speech_commands_v0.02"))
 
 idx_label_dict = {label: idx for idx, label in enumerate(labels)}
     
-forward_label = idx_label_dict["forward"]
-backward_label = idx_label_dict["backward"]
+up_label = idx_label_dict["up"]
+down_label = idx_label_dict["down"]
 right_label = idx_label_dict["right"]
 left_label = idx_label_dict["left"]
 
-labels = ["forward", "right", "backward", "left", "unknown"]
+labels = ["up", "right", "down", "left", "unknown"]
 
 def main():
     train_ds, test_ds = tf.keras.utils.audio_dataset_from_directory(
-                            directory="./speech_commands_v0.02",
+                            directory="./../../speech_commands_v0.02",
                             batch_size=None,
                             validation_split=0.1,
                             seed=0,
@@ -37,6 +37,8 @@ def main():
     label_cnt = np.zeros(shape=(5,), dtype=np.uint64)
     for wav, label in train_ds:
         label_cnt[label] += 1
+    
+    print(label_cnt)
     
     fig, axs = plt.subplots(nrows=2, ncols=1)
 
@@ -63,17 +65,17 @@ def main():
 
 def relabel(label):
 
-    # forward: 0
+    # up: 0
     # right: 1
-    # backward: 2
+    # down: 2
     # left: 3
     # unknown: 4
 
-    if label == forward_label:
+    if label == up_label:
         return 0
     elif label == right_label:
         return 1
-    elif label == backward_label:
+    elif label == down_label:
         return 2
     elif label == left_label:
         return 3
