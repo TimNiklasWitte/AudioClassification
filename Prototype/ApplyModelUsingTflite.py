@@ -2,7 +2,7 @@ from tflite_runtime.interpreter import Interpreter
 import numpy as np
 
 # Load the TFLite model and allocate tensors.
-interpreter = Interpreter(model_path="food_model_250.tflite")
+interpreter = Interpreter(model_path="saved_models/model.tflite")
 interpreter.allocate_tensors()  
 
 # Get input and output tensors.
