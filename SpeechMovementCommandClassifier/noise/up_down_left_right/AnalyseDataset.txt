@@ -1,0 +1,2 @@
+labels = ["top", "right", "down", "left", "unknown"]
+[ 3334  3437  3532  3462 81487]
