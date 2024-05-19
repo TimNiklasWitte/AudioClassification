@@ -5,14 +5,14 @@ import os
 import librosa
 import numpy as np
 
-from Classifier import *
+from SpeechMovementCommandClassifier import *
 
 NUM_EPOCHS = 20
 BATCH_SIZE = 64
 
 
 # alphanumeric order
-labels = sorted(os.listdir("./../../speech_commands_v0.02"))
+labels = sorted(os.listdir("./speech_commands_v0.02"))
 
 idx_label_dict = {label: idx for idx, label in enumerate(labels)}
     
@@ -29,7 +29,7 @@ def main():
     #   
     
     train_ds, test_ds = tf.keras.utils.audio_dataset_from_directory(
-                            directory="./../../speech_commands_v0.02",
+                            directory="./speech_commands_v0.02",
                             batch_size=None,
                             validation_split=0.1,
                             seed=0,
@@ -37,8 +37,8 @@ def main():
                             subset='both'
                         )
     
-    train_ds = train_ds.apply(prepare_data)
-    test_ds = test_ds.apply(prepare_data)
+    train_ds = train_ds.apply(prepare_data).take(10)
+    test_ds = test_ds.apply(prepare_data).take(10)
      
     #
     # Logging
@@ -51,14 +51,14 @@ def main():
     # Initialize model
     #
 
-    classifier = Classifier()
+    classifier = SpeechMovementCommandClassifier()
 
-    x = tf.zeros(shape=(32, 124, 129, 1))
+    x = tf.zeros(shape=(32, 128, 128, 1))
     classifier(x)
     
-    classifier.build(input_shape=(1, 124, 129, 1))
+    classifier.build(input_shape=(1, 128, 128, 1))
     classifier.summary()
-
+ 
     #
     # Train and test loss/accuracy
     #
@@ -97,16 +97,8 @@ def log(train_summary_writer, classifier, train_dataset, test_dataset, epoch):
         # Train
         #
         for metric in classifier.metrics:
-
-            if isinstance(metric, tf.keras.metrics.F1Score):
-                f1_scores = metric.result()
-                for idx, label in enumerate(label_names):
-                    print(f"train_{metric.name}_{label}: {f1_scores[idx]}")
-                    tf.summary.scalar(f"train_{metric.name}_{label}", f1_scores[idx], step=epoch)
-
-            else:
-                tf.summary.scalar(f"train_{metric.name}", metric.result(), step=epoch)
-                print(f"train_{metric.name}: {metric.result()}")
+            tf.summary.scalar(f"train_{metric.name}", metric.result(), step=epoch)
+            print(f"train_{metric.name}: {metric.result()}")
 
             metric.reset_state()
 
@@ -118,15 +110,8 @@ def log(train_summary_writer, classifier, train_dataset, test_dataset, epoch):
         classifier.test_step(test_dataset)
 
         for metric in classifier.metrics:
-            if isinstance(metric, tf.keras.metrics.F1Score):
-                f1_scores = metric.result()
-                for idx, label in enumerate(label_names):
-                    print(f"test_{metric.name}_{label}: {f1_scores[idx]}")
-                    tf.summary.scalar(f"test_{metric.name}_{label}", f1_scores[idx], step=epoch)
-
-            else:
-                tf.summary.scalar(f"test_{metric.name}", metric.result(), step=epoch)
-                print(f"test_{metric.name}: {metric.result()}")
+            tf.summary.scalar(f"test_{metric.name}", metric.result(), step=epoch)
+            print(f"test_{metric.name}: {metric.result()}")
 
 
 
@@ -142,35 +127,44 @@ def get_spectrogram(wav):
     return spectrogram
 
 
-idel_wav_file_path = "./../../../LESSI noise/Idel.wav"
+idel_wav_file_path = "./../LESSI noise/Idel.wav"
 idel_wav, sr = librosa.load(idel_wav_file_path)
 idel_wav = librosa.resample(y=idel_wav, orig_sr=sr, target_sr=16000)
 
-walk_wav_file_path = "./../../../LESSI noise/Walk.wav"
+walk_wav_file_path = "./../LESSI noise/Walk.wav"
 walk_wav, sr = librosa.load(walk_wav_file_path)
 walk_wav = walk_wav[50000:]
 walk_wav = librosa.resample(y=walk_wav, orig_sr=sr, target_sr=16000)
-
 
 def add_noise(speech_wav):
     r = tf.random.uniform(shape=(), minval=0, maxval=2, dtype=tf.int32)
 
     # idel
     if r == 0:
-        pos = np.random.randint(low=0, high=len(idel_wav) - 16000)
+    
         min_alpha = 0.2
         max_alpha = 0.4
-        alpha = (max_alpha - min_alpha) * np.random.random() + min_alpha
-        superimposed = alpha * speech_wav + (1 - alpha) * idel_wav[pos:pos+16000]
+        alpha = tf.random.uniform(shape=(), minval=min_alpha, maxval=max_alpha, dtype=tf.float32)
+
+        pos = tf.random.uniform(shape=(), minval=0, maxval=len(idel_wav) - 16000, dtype=tf.int32)
+        noise_indices = tf.range(pos, pos+16000, dtype=tf.dtypes.int64)
+        noise = tf.gather(idel_wav, noise_indices)
+
+        superimposed = alpha * speech_wav + (1 - alpha) * noise
         return superimposed
     
     # walk
     else:
-        pos = np.random.randint(low=0, high=len(walk_wav) - 16000)
+        
         min_alpha = 0.4
         max_alpha = 0.5
-        alpha = (max_alpha - min_alpha) * np.random.random() + min_alpha
-        superimposed = alpha * speech_wav + (1 - alpha) * walk_wav[pos:pos+16000]
+        alpha = tf.random.uniform(shape=(), minval=min_alpha, maxval=max_alpha, dtype=tf.float32)
+
+        pos = tf.random.uniform(shape=(), minval=0, maxval=len(walk_wav) - 16000, dtype=tf.int32)
+        noise_indices = tf.range(pos, pos+16000, dtype=tf.dtypes.int64)
+        noise = tf.gather(walk_wav, noise_indices)
+
+        superimposed = alpha * speech_wav + (1 - alpha) * noise
         return superimposed
 
 
@@ -211,10 +205,13 @@ def prepare_data(dataset):
 
     dataset = dataset.cache()
 
-    dataset = dataset.map(lambda wav, label:(add_noise(wav), label))
+    dataset = dataset.map(lambda wav, target: (add_noise(wav), target))
 
-    # Spectrogram (height, width, 1)
-    dataset = dataset.map(lambda wav, label:(get_spectrogram(wav), label))
+    # Spectrogram shape = (124, 129, 1)
+    dataset = dataset.map(lambda wav, target:(get_spectrogram(wav), target))
+
+    # resize: (124, 129) -> (128, 128)
+    dataset = dataset.map(lambda spectrogram, target: (tf.image.resize(spectrogram, (128, 128)), target))
 
     #
     # Shuffle, batch, prefetch
