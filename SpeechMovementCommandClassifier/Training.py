@@ -37,8 +37,8 @@ def main():
                             subset='both'
                         )
     
-    train_ds = train_ds.apply(prepare_data).take(10)
-    test_ds = test_ds.apply(prepare_data).take(10)
+    train_ds = train_ds.apply(prepare_data)
+    test_ds = test_ds.apply(prepare_data)
      
     #
     # Logging
