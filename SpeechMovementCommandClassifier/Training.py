@@ -3,13 +3,11 @@ import tqdm
 import datetime
 import os 
 import librosa
-import numpy as np
 
 from SpeechMovementCommandClassifier import *
 
-NUM_EPOCHS = 20
+NUM_EPOCHS = 50
 BATCH_SIZE = 64
-
 
 # alphanumeric order
 labels = sorted(os.listdir("./speech_commands_v0.02"))

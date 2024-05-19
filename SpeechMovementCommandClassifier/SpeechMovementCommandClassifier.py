@@ -11,15 +11,12 @@ class SpeechMovementCommandClassifier(tf.keras.Model):
         self.layer_list = [
             IdentityBlock(16),
             IdentityBlock(16),
-            IdentityBlock(16),
             ConvBlock(32),
 
             IdentityBlock(32),
             IdentityBlock(32),
-            IdentityBlock(32),
             ConvBlock(64),
 
-            IdentityBlock(64),
             IdentityBlock(64),
             IdentityBlock(64),
      
