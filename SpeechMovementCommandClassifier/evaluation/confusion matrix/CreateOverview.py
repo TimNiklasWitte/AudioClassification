@@ -36,7 +36,7 @@ def main():
 
     df_idel = df.loc[df["Noise type"] == "idel"]
     df_walk = df.loc[df["Noise type"] == "walk"]
-
+ 
     lineplot = sns.lineplot(df_idel, x="Alpha", y ="Accuracy", hue="Label", ax=axs[0])
     axs[0].set_title("Idel")
     axs[0].grid()
@@ -45,11 +45,11 @@ def main():
 
     lineplot.invert_xaxis()
 
-
-    lineplot = sns.lineplot(df_idel, x="Alpha", y ="Accuracy", hue="Label", ax=axs[1])
+    lineplot = sns.lineplot(df_walk, x="Alpha", y ="Accuracy", hue="Label", ax=axs[1])
+    
     axs[1].set_title("Walk")
     axs[1].grid()
-
+     
     axs[1].axvline(x=0.4, c="black")
     axs[1].axvline(x=1, c="black")
 

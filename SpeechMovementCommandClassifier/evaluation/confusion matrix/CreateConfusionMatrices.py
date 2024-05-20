@@ -165,8 +165,11 @@ def main():
                             subset='both'
                         )
     
+
+    alpha_range = list(np.arange(1, 0.0, -0.1)) + list(np.arange(0.1, 0.00, -0.01))
+
     for noise_type in ["idel", "walk"]:
-        for alpha in np.arange(0.1, 0.00, -0.01): #np.arange(1, 0.0, -0.1): # np.arange(0.1, 0.00, -0.01)
+        for alpha in alpha_range:
 
             preprocessing_pipeline = create_pipeline(alpha=alpha, noise_type=noise_type)
 
@@ -196,8 +199,8 @@ def main():
             
             
             # Normalize
-            num_labels_per_class = tf.reduce_sum(confusion_matrix, axis=1)
-            num_labels_per_class = tf.expand_dims(num_labels_per_class, axis=1)
+            num_labels_per_class = tf.reduce_sum(confusion_matrix, axis=0)
+            num_labels_per_class = tf.expand_dims(num_labels_per_class, axis=0)
             confusion_matrix = confusion_matrix / num_labels_per_class
 
 
@@ -206,8 +209,8 @@ def main():
 
             df_cm = pd.DataFrame(confusion_matrix, index = label_names, columns = label_names)
             heatmap = sn.heatmap(df_cm, annot=True)
-            heatmap.set_xlabel("Predicted label")
-            heatmap.set_ylabel("True label")
+            heatmap.set_xlabel("True label")
+            heatmap.set_ylabel("Predicted label")
 
             plt.title(f"{noise_type}, alpha = {alpha:.2f}")
             plt.savefig(f"./plots/{noise_type}/ConfusionMatrix_{alpha:.2f}.png")
