@@ -1,17 +1,17 @@
-from Classifier import *
+from SpeechMovementCommandClassifier import *
 
 import tensorflow as tf
 import wave
 import pyaudio
 import sounddevice
 import numpy as np
-
+import zmq
 
 def main():
 
     label_names = ["up", "right", "down", "left", "unkown"]
 
-    classifier = Classifier()
+    classifier = SpeechMovementCommandClassifier()
 
     x = tf.zeros(shape=(32, 124, 129, 1))
     classifier(x)
@@ -30,6 +30,9 @@ def main():
         input=True,
         frames_per_buffer=3200
     )
+    context = zmq.Context()
+    socket = context.socket(zmq.PUB)
+    socket.bind("tcp://*:5555")
 
     while True:
         
@@ -62,6 +65,8 @@ def main():
         prediction = tf.argmax(prediction).numpy()
         word = label_names[prediction]
         print(word)
+        socket.send_string(word)
+        
 
 
 
