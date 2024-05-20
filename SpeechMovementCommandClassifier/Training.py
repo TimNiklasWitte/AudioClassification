@@ -140,8 +140,8 @@ def add_noise(speech_wav):
     # idel
     if r == 0:
     
-        min_alpha = 0.2
-        max_alpha = 0.4
+        min_alpha = 0.01
+        max_alpha = 0.5
         alpha = tf.random.uniform(shape=(), minval=min_alpha, maxval=max_alpha, dtype=tf.float32)
 
         pos = tf.random.uniform(shape=(), minval=0, maxval=len(idel_wav) - 16000, dtype=tf.int32)
@@ -155,7 +155,7 @@ def add_noise(speech_wav):
     else:
         
         min_alpha = 0.4
-        max_alpha = 0.5
+        max_alpha = 1
         alpha = tf.random.uniform(shape=(), minval=min_alpha, maxval=max_alpha, dtype=tf.float32)
 
         pos = tf.random.uniform(shape=(), minval=0, maxval=len(walk_wav) - 16000, dtype=tf.int32)
