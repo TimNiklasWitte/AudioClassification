@@ -3,26 +3,25 @@
 import rospy
 from std_msgs.msg import String
 import zmq
+import signal
 
-def talker():
-    pub = rospy.Publisher('chatter', String, queue_size=10)
-    rospy.init_node('talker', anonymous=True)
-    rate = rospy.Rate(10) # 10hz
-
+def SpeechClassifier():
+    pub = rospy.Publisher('movement', String, queue_size=10)
+    rospy.init_node('SpeechClassifier', anonymous=True)
     context = zmq.Context()
     socket = context.socket(zmq.SUB)
     socket.connect("tcp://localhost:5555")
     socket.setsockopt(zmq.SUBSCRIBE, "")
     while not rospy.is_shutdown():
+        signal.signal(signal.SIGINT, signal.SIG_DFL)
         message = socket.recv_string()
         print("Received:", message)
-        hello_str = "Received: %s" % message
-        rospy.loginfo(hello_str)
-        pub.publish(hello_str)
-        rate.sleep()
+        msg_str = "Received: %s" % message
+        rospy.loginfo(msg_str)
+        pub.publish(message)
 
 if __name__ == '__main__':
     try:
-        talker()
+        SpeechClassifier()
     except rospy.ROSInterruptException:
         pass
