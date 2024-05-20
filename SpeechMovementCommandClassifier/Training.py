@@ -75,7 +75,7 @@ def main():
 
         log(train_summary_writer, classifier, train_ds, test_ds, epoch)
 
-        if epoch % 10 == 0:
+        if epoch % 5 == 0:
             # Save model (its parameters)
             classifier.save_weights(f"./saved_models/epoch_{epoch}.weights.h5")
 
