@@ -9,4 +9,4 @@ classifier.summary()
 
 classifier.load_weights(f"./saved_models/epoch_20.weights.h5")
 
-convert_model_to_tflite(classifier, target_path="./saved_models", model_name= model_full)
+convert_model_to_tflite(classifier, target_path="./saved_models", model_name= "model_full")
