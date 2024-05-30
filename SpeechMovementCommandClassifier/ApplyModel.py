@@ -1,4 +1,4 @@
-from Classifier import *
+from SpeechMovementCommandClassifier import *
 
 import tensorflow as tf
 import wave
@@ -11,15 +11,15 @@ def main():
 
     label_names = ["up", "right", "down", "left", "unkown"]
 
-    classifier = Classifier()
+    classifier = SpeechMovementCommandClassifier()
 
-    x = tf.zeros(shape=(32, 124, 129, 1))
+    x = tf.zeros(shape=(32, 128, 128, 1))
     classifier(x)
         
-    classifier.build(input_shape=(1, 124, 129, 1))
+    classifier.build(input_shape=(1, 128, 128, 1))
     classifier.summary()
 
-    classifier.load_weights(f"./saved_models/epoch_20.weights.h5")
+    classifier.load_weights(f"./saved_models/epoch_30.weights.h5")
 
     p = pyaudio.PyAudio()
 
